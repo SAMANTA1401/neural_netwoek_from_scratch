@@ -1,5 +1,6 @@
 from Softmax_Act import Activation_Softmax
 from Cat_Crossentropy_Loss import Loss_Categorical_Crossentropy
+import numpy as  np
 
 # Softmax classifier - combined Softmax activation
 # and cross-entropy loss for faster backward step
@@ -45,3 +46,36 @@ class Activation_Softmax_Loss_CategoricalCrossentropy:
 
         # Normalize gradient
         self.dinputs = self.dinputs / samples
+
+    def regularization_loss(self, layer):
+        #0 by default
+        regularization_loss = 0
+        #L1 regularization - weights
+        # Calculate only when factor greater than 0
+        if layer.weight_regularizer_l1 > 0:
+            regularization_loss += layer.weight_regularizer_l1 * np.sum(np.abs(layer.weights))
+        #L2 regularization - weights
+        if layer.weight_regularizer_l2 > 0:
+            regularization_loss += layer.weight_regularizer_l2 * np.sum(layer.weights * layer.weights)
+        #L1 regularization - biases
+        # Calculate only when factor greater than 0
+        if layer.bias_regularizer_l1 > 0:
+            regularization_loss += layer.bias_regularizer_l1 * np.sum(np.abs(layer.biases))
+        #L2 regularization - biases
+        if layer.bias_regularizer_l2 > 0:
+            regularization_loss += layer.bias_regularizer_l2 * np.sum(layer.biases * layer.biases)
+        return regularization_loss
+    
+    # calculate the data and regularization losses
+    # given model output and ground truth values
+    def calculate_loss(self, model_output, y):
+        # calculate loss from output of activation2 (softmax activation)
+        data_loss = self.forward(model_output, y)
+        # calculate regularization penalty
+        # regularization_loss = self.regularization_loss(model_output)
+        # # calculate total loss
+        # total_loss = data_loss + regularization_loss
+        # return total_loss
+        data_loss = np.mean(data_loss)
+        return data_loss
+    
